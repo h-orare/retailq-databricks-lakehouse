@@ -5,13 +5,13 @@ on a schedule, with retries and alerting. Create: Jobs & Pipelines → Job.
 
 ## The DAG: retailq_end_to_end
 
-| # | Task | Type | Depends on |
-|---|---|---|---|
-| 1 | postgres_to_bronze | Ingestion pipeline (Lakeflow Connect) | — |
-| 2 | salesforce_to_bronze | Ingestion pipeline | task 1 * |
-| 3 | blob_to_bronze | Notebook (Auto Loader) | task 2 * |
-| 4 | silver_and_gold | ETL pipeline (declarative) | task 3 |
-| 5 | dashboard_refresh | Dashboard | task 4 |
+| #   | Task                 | Type                                  | Depends on |
+| --- | -------------------- | ------------------------------------- | ---------- |
+| 1   | postgres_to_bronze   | Ingestion pipeline (Lakeflow Connect) | —          |
+| 2   | salesforce_to_bronze | Ingestion pipeline                    | task 1 \*  |
+| 3   | blob_to_bronze       | Notebook (Auto Loader)                | task 2 \*  |
+| 4   | silver_and_gold      | ETL pipeline (declarative)            | task 3     |
+| 5   | dashboard_refresh    | Dashboard                             | task 4     |
 
 \* **Serial only because of a free-edition limit** — one ingestion pipeline at a
 time. The three bronze ingests are independent; in production they run in
@@ -33,15 +33,15 @@ hand; Databricks also infers some automatically from what you select.
 
 This is the key conceptual payoff of the whole project:
 
-| Object | Kind | Refreshed by the job? |
-|---|---|---|
-| bronze tables | streaming tables | yes — the ingestion tasks |
-| silver tables | streaming / MV | yes — the ETL task |
-| fact_sales | materialised table | yes — the ETL task |
-| gold dim_* | **views** | no — computed at query time |
-| metric view | **view** | no — computed at query time |
-| Genie space | reads views | no — live |
-| dashboard | cached result | **yes — explicit refresh task** |
+| Object        | Kind               | Refreshed by the job?           |
+| ------------- | ------------------ | ------------------------------- |
+| bronze tables | streaming tables   | yes — the ingestion tasks       |
+| silver tables | streaming / MV     | yes — the ETL task              |
+| fact_sales    | materialised table | yes — the ETL task              |
+| gold dim\_\*  | **views**          | no — computed at query time     |
+| metric view   | **view**           | no — computed at query time     |
+| Genie space   | reads views        | no — live                       |
+| dashboard     | cached result      | **yes — explicit refresh task** |
 
 Rule: **stored objects (tables) must be rebuilt; views are live and need no
 refresh.** The dashboard is the one consumption object that caches its result,
@@ -50,16 +50,17 @@ Genie) reads fresh at query time.
 
 ## Job settings
 
-| Setting | Notes |
-|---|---|
-| Compute | serverless here; a task can override |
-| Retries | default 4 per task; configurable |
-| Trigger | manual · scheduled (cron) · file arrival · table update · continuous |
-| Job parameters | pass values in at run time (not used here) |
-| Notifications | email on start / success / failure / duration / stream backlog |
-| Git | version the job definition + code |
+| Setting        | Notes                                                                |
+| -------------- | -------------------------------------------------------------------- |
+| Compute        | serverless here; a task can override                                 |
+| Retries        | default 4 per task; configurable                                     |
+| Trigger        | manual · scheduled (cron) · file arrival · table update · continuous |
+| Job parameters | pass values in at run time (not used here)                           |
+| Notifications  | email on start / success / failure / duration / stream backlog       |
+| Git            | version the job definition + code                                    |
 
 ### Triggers in full
+
 - **Scheduled** — fixed times; simple interval or a cron expression for advanced
   cadences ("every 3rd weekday at 06:00"). Most common.
 - **File arrival** — run when a new file lands in a location (pairs naturally
@@ -69,11 +70,13 @@ Genie) reads fresh at query time.
   expensive — avoid on the trial.
 
 ### Retries and idempotency
+
 Default 4 retries is safe here **because every task is idempotent**:
 declarative pipelines and Auto Loader use checkpoints, so a re-run never
 double-loads. Confirm idempotency before trusting retries on any new task.
 
 ### Repair run (not shown in the tutorial, but examinable)
+
 If a job fails partway, a **Repair run** re-executes only the FAILED and
 downstream tasks, reusing the successful ones — not the whole DAG. This is the
 standard recovery pattern and is DE Associate content.
@@ -95,6 +98,3 @@ standard recovery pattern and is DE Associate content.
 - **Retries**, **Repair run** (re-run only failed tasks)
 - **Notifications** and failure handling
 - **Job clusters vs all-purpose compute** (here: serverless)
-
-This section and the declarative-pipeline section (7) are the two most heavily
-weighted areas on the DE Associate.

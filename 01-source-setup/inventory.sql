@@ -72,8 +72,7 @@ VALUES
 -- data quality expectations (section 7).
 --
 -- inventory_id is the PRIMARY KEY and is VARCHAR, so it can
--- be neither NULL nor a bare integer. Defects live in the
--- non-key columns instead.
+-- be neither NULL nor a bare integer. 
 -- =========================================================
 
 INSERT INTO inventory (
