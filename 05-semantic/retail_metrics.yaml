@@ -1,0 +1,122 @@
+# =========================================================
+# RetailQ — semantic layer: metric view definition (reference)
+#
+# Created in Databricks with:
+#   CREATE VIEW retail_q.retail_semantic.retail_metrics
+#   WITH METRICS
+#   LANGUAGE YAML
+#   AS $$ <the content below> $$;
+#
+# (In the tutorial, "WITH METRICS LANGUAGE YAML" is what is mis-transcribed
+#  as "matrix language ML". It is YAML, not ML.)
+#
+# This is a known-good reference to CHECK the AI-generated view against.
+# The AI cannot know table grain, so every measure expression must be reviewed.
+# =========================================================
+
+version: 0.1
+
+# The fact is the source. Dimensions are joined in.
+source: retail_q.retail_gold.fact_sales
+
+joins:
+  - name: product
+    source: retail_q.retail_gold.dim_product
+    'on': source.product_id = product.product_id
+
+  - name: customer
+    source: retail_q.retail_gold.dim_customer
+    'on': source.customer_id = customer.customer_id
+
+  - name: calendar
+    source: retail_q.retail_gold.dim_calendar
+    'on': source.transaction_date = calendar.date
+
+# -------------------------------------------------------------------
+# DIMENSIONS — the "by what". No aggregation; just the slicing angles.
+# -------------------------------------------------------------------
+dimensions:
+  - name: Year
+    expr: calendar.year
+  - name: Quarter
+    expr: calendar.year_quarter
+  - name: Month
+    expr: calendar.year_month
+  - name: Month name
+    expr: calendar.month_name
+  - name: Is weekend
+    expr: calendar.is_weekend
+
+  - name: Category
+    expr: product.category
+  - name: Subcategory
+    expr: product.subcategory
+  - name: Brand
+    expr: product.brand
+  - name: Product segment
+    expr: product.product_segment
+  - name: Product name
+    expr: product.product_name
+
+  - name: Customer
+    expr: customer.customer_name
+  - name: Customer type
+    expr: customer.customer_type
+  - name: Industry
+    expr: customer.industry
+  - name: Customer country
+    expr: customer.billing_country
+
+  - name: Payment mode
+    expr: source.payment_mode
+  - name: Sales channel
+    expr: source.sales_channel
+
+# -------------------------------------------------------------------
+# MEASURES — the "how much". Each carries its own aggregation rule.
+# These are the lines to scrutinise in any AI-generated version.
+# -------------------------------------------------------------------
+measures:
+
+  # Revenue = quantity * price. NOT SUM(selling_price): a unit price summed
+  # across rows is meaningless. Discount subtracted to get net revenue.
+  - name: Total revenue
+    expr: SUM(source.quantity * source.selling_price - coalesce(source.discount_amount, 0))
+    # synonyms: ["revenue", "net sales", "sales", "total sales"]
+
+  - name: Gross revenue
+    expr: SUM(source.quantity * source.selling_price)
+    # synonyms: ["gross sales"]
+
+  - name: Total quantity
+    expr: SUM(source.quantity)
+    # synonyms: ["units sold", "items sold", "quantity sold"]
+
+  - name: Total discount
+    expr: SUM(source.discount_amount)
+
+  # Grain is one row per transaction, so a plain COUNT is the transaction count.
+  - name: Transaction count
+    expr: COUNT(1)
+    # synonyms: ["number of transactions", "orders", "transactions"]
+
+  - name: Unique customers
+    expr: COUNT(DISTINCT source.customer_id)
+    # synonyms: ["distinct customers", "number of customers", "customer count"]
+
+  - name: Unique products sold
+    expr: COUNT(DISTINCT source.product_id)
+
+  # Ratio measures reference other measures, so they stay correct under any
+  # group-by (average of averages is avoided).
+  - name: Average transaction value
+    expr: SUM(source.quantity * source.selling_price - coalesce(source.discount_amount, 0)) / COUNT(1)
+    # synonyms: ["ATV", "average order value", "AOV"]
+
+# -------------------------------------------------------------------
+# DELIBERATELY ABSENT
+# -------------------------------------------------------------------
+# No measure aggregates opportunity `amount`. On fact_sales it sits at
+# opportunity grain, repeated across a deal's transactions, so SUM(amount)
+# double-counts. If the AI generated a "total_amount = SUM(amount)" measure,
+# DELETE it — this is the section-8 Flag B trap reaching the semantic layer.

@@ -1,0 +1,27 @@
+# Secrets — never commit credentials
+*.env
+.env*
+*secret*
+*credential*
+*.pem
+*connection-string*
+
+# The stray double-extension diagram export
+*.png.svg
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Office temp
+~$*.docx

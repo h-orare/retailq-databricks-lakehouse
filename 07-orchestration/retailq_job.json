@@ -1,0 +1,44 @@
+{
+  "//": "Reference shape of the RetailQ end-to-end job. Export your actual",
+  "//2": "definition from the Databricks UI (Job -> ... -> Export/View JSON)",
+  "//3": "and replace this file. Pipeline/notebook ids are workspace-specific.",
+  "name": "retailq_end_to_end",
+  "tasks": [
+    {
+      "task_key": "postgres_to_bronze",
+      "pipeline_task": { "pipeline_id": "<postgres_to_bronze pipeline id>" }
+    },
+    {
+      "task_key": "salesforce_to_bronze",
+      "pipeline_task": { "pipeline_id": "<salesforce_to_bronze pipeline id>" },
+      "depends_on": [ { "task_key": "postgres_to_bronze" } ],
+      "//": "serial ONLY due to free-edition single-pipeline limit; remove this depends_on in production to run bronze in parallel"
+    },
+    {
+      "task_key": "blob_to_bronze",
+      "notebook_task": { "notebook_path": "/Workspace/retailq/blob_to_bronze" },
+      "depends_on": [ { "task_key": "salesforce_to_bronze" } ]
+    },
+    {
+      "task_key": "silver_and_gold",
+      "pipeline_task": { "pipeline_id": "<retail_transformations pipeline id>" },
+      "depends_on": [ { "task_key": "blob_to_bronze" } ]
+    },
+    {
+      "task_key": "dashboard_refresh",
+      "dashboard_task": { "dashboard_id": "<retail dashboard id>" },
+      "depends_on": [ { "task_key": "silver_and_gold" } ]
+    }
+  ],
+  "queue": { "enabled": true },
+  "max_concurrent_runs": 1,
+  "trigger": {
+    "//": "left unset = manual. For a daily 6am run, uncomment:",
+    "//pause_status": "PAUSED",
+    "//periodic": { "interval": 1, "unit": "DAYS" }
+  },
+  "email_notifications": {
+    "on_failure": [ "you@example.com" ]
+  },
+  "//retries": "configured per task in the UI (default 4)"
+}
