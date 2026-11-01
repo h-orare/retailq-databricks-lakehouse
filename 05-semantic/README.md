@@ -53,15 +53,15 @@ GROUP BY Category;
 
 ## Why it matters
 
-| Governs | Mechanism |
-|---|---|
-| Access | Unity Catalog (who can read a table) |
-| **Meaning** | **Metric view (what "revenue" is)** |
+| Governs     | Mechanism                            |
+| ----------- | ------------------------------------ |
+| Access      | Unity Catalog (who can read a table) |
+| **Meaning** | **Metric view (what "revenue" is)**  |
 
 Without a semantic layer, every dashboard redefines "revenue" in its own SQL,
 and three dashboards quietly disagree. The metric view makes one definition
 that SQL, dashboards, Genie and alerts all inherit. This is governance of
-*meaning*, the complement to Unity Catalog's governance of *access*.
+_meaning_, the complement to Unity Catalog's governance of _access_.
 
 ## Synonyms — what makes Genie work (section 11)
 
@@ -95,17 +95,3 @@ so every measure expression must be reviewed. Three checks:
    that point. The tutor then went back, added `account_id AS customer_id` to
    the fact, re-ran the pipeline, and had the AI add the join. Verify
    `customer_id` is present in the fact and the customer join is in the YAML.
-
-## The workflow friction worth noting
-
-The assistant claimed to create the metric view but did not actually persist it
-— the object had to be created by copying the generated YAML into a notebook and
-running the `CREATE VIEW` statement. A reminder that "the AI did it" and "it
-exists in the catalog" are not the same; verify the object is really there.
-
-## Exam relevance
-
-Metric views are newer than the DE Associate blueprint and are **not** core exam
-content. Build this for the portfolio and the real-world skill, not the exam.
-The transferable, examinable idea is the semantic-layer concept itself:
-centralised, governed metric definitions versus ad-hoc per-dashboard SQL.

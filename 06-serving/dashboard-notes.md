@@ -15,12 +15,12 @@ measure × dimension and renders it.
 
 ## Anatomy
 
-| Part | What it is |
-|---|---|
-| Dataset | the data source behind the dashboard — here, the metric view |
-| Widget / visualization | one chart or number tile, = a measure sliced by a dimension |
-| SQL warehouse | the compute that runs the queries; starts automatically on first use |
-| Draft vs Published | draft = editor view; Published = what viewers see. Must publish. |
+| Part                   | What it is                                                           |
+| ---------------------- | -------------------------------------------------------------------- |
+| Dataset                | the data source behind the dashboard — here, the metric view         |
+| Widget / visualization | one chart or number tile, = a measure sliced by a dimension          |
+| SQL warehouse          | the compute that runs the queries; starts automatically on first use |
+| Draft vs Published     | draft = editor view; Published = what viewers see. Must publish.     |
 
 ## The metric-view payoff, made concrete
 
@@ -30,7 +30,7 @@ different dimension, resolved at render time. Without the metric view, each
 widget would need its own `GROUP BY` query or view. This is the single clearest
 demonstration of why the semantic layer exists.
 
-## The AI-generation gotcha (the tutor hit it)
+## The AI-generation gotcha
 
 The assistant built the dashboard but every widget came up empty —
 "select fields to visualize". A follow-up prompt ("all visualizations are empty,
@@ -48,10 +48,10 @@ project; just know a dashboard left open and refreshing is spending credits.
 ## THIS project's dashboard — matched to the actual data
 
 `customer_id` and all opportunity-side columns are null (the transaction↔
-opportunity join matched nothing). So some of the tutor's widgets cannot be
-reproduced. Build these instead:
+opportunity join matched nothing).
 
 ### KPI row (Counter widgets — one measure, no dimension)
+
 - Total revenue
 - Transaction count
 - Total quantity
@@ -59,29 +59,21 @@ reproduced. Build these instead:
 - Unique products sold
 
 ### Charts (measure × dimension)
-| Widget | Dimension | Measure | Type |
-|---|---|---|---|
-| Revenue over time | Month | Total revenue | line |
-| Revenue by category | Category | Total revenue | bar |
-| Revenue by brand | Brand | Total revenue | bar |
-| Revenue by payment mode | Payment mode | Total revenue | donut/bar |
-| Units by product segment | Product segment | Total quantity | bar |
-| Revenue by sales channel | Sales channel | Total revenue | bar |
-| Revenue by store | Store | Total revenue | bar |
-| Weekend vs weekday | Is weekend | Total revenue | bar |
+
+| Widget                   | Dimension       | Measure        | Type      |
+| ------------------------ | --------------- | -------------- | --------- |
+| Revenue over time        | Month           | Total revenue  | line      |
+| Revenue by category      | Category        | Total revenue  | bar       |
+| Revenue by brand         | Brand           | Total revenue  | bar       |
+| Revenue by payment mode  | Payment mode    | Total revenue  | donut/bar |
+| Units by product segment | Product segment | Total quantity | bar       |
+| Revenue by sales channel | Sales channel   | Total revenue  | bar       |
+| Revenue by store         | Store           | Total revenue  | bar       |
+| Weekend vs weekday       | Is weekend      | Total revenue  | bar       |
 
 ### Do NOT build (all-null source columns)
+
 - Revenue by customer / country / industry / customer type
 - Unique customers (returns 0)
 - Revenue by opportunity stage
 - Average deal amount
-
-Layout mockup: `00-docs/dashboard-plan.png`.
-
-## Portfolio capture
-
-Before the trial lapses, screenshot the published dashboard into
-`06-serving/screenshots/`. Once the workspace is gone, the screenshot is the
-dashboard, as far as the resume is concerned. The tutor also exports the
-dashboard definition file for import — do the same if the option is offered;
-it is a shareable artifact for the repo.

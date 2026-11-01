@@ -32,6 +32,7 @@ it **inherits** the joins, the single definition of revenue, and the synonyms
 already declared in section 9 — nothing to guess, little to configure.
 
 Two reasons it is the better choice here:
+
 1. The modelling work is already done; don't redo it in a second place.
 2. The metric view already **excludes** the null customer fields, so Genie
    cannot be handed a dead question about customers.
@@ -42,17 +43,17 @@ querying trustworthy for free; raw tables make Genie improvise.
 
 ## The Genie config tabs
 
-| Tab | Purpose |
-|---|---|
-| Description | what the space is (AI-drafted, editable) |
-| Sample questions | the starter questions users see on first open |
-| Data | the tables / views / metric views exposed |
-| Instructions | plain-English guidance: tone, abbreviations, business rules |
-| Joins | explicit join conditions (always set these for raw tables) |
-| SQL expressions | reusable measures/dimensions + synonyms (a mini metric view) |
-| Example SQL | question → SQL shortcuts for frequent asks |
-| Monitoring | history of questions asked |
-| Benchmarking | question → expected answer/SQL, to TEST the space's accuracy |
+| Tab              | Purpose                                                      |
+| ---------------- | ------------------------------------------------------------ |
+| Description      | what the space is (AI-drafted, editable)                     |
+| Sample questions | the starter questions users see on first open                |
+| Data             | the tables / views / metric views exposed                    |
+| Instructions     | plain-English guidance: tone, abbreviations, business rules  |
+| Joins            | explicit join conditions (always set these for raw tables)   |
+| SQL expressions  | reusable measures/dimensions + synonyms (a mini metric view) |
+| Example SQL      | question → SQL shortcuts for frequent asks                   |
+| Monitoring       | history of questions asked                                   |
+| Benchmarking     | question → expected answer/SQL, to TEST the space's accuracy |
 
 ## Benchmarking — the part worth noting
 
@@ -65,24 +66,20 @@ correctness, not just capability.
 ## For THIS project — ask what the data supports
 
 Good questions (real data behind them):
+
 - Which category / brand makes the most revenue?
 - How has revenue trended by month?
 - Which payment mode or sales channel drives the most sales?
 - Average transaction value by product segment?
 
 Avoid (null opportunity columns):
+
 - Which customer buys the most? / revenue by country / by industry
 - Breakdown by opportunity stage
-These read the empty opportunity-side columns and return nothing useful.
+  These read the empty opportunity-side columns and return nothing useful.
 
 ## Databricks One / Databricks Genie (section 12)
 
 A simplified, business-user UI that surfaces dashboards and Genie spaces without
 the full workspace. Same underlying objects, cleaner front door for non-technical
 consumers. Nothing new to build.
-
-## Exam relevance
-
-Genie is AI/BI, not DE Associate content. Build it for the portfolio. The
-transferable, examinable idea is governance and the semantic model feeding it,
-not Genie itself.

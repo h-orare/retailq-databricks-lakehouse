@@ -11,13 +11,13 @@ instead.
 
 ## Unity Catalog objects
 
-| Object | Name | Purpose |
-|---|---|---|
-| Schema | `retailq.volumes` | Holds volumes, kept separate from table schemas |
-| Volume | `retailq.volumes.blob_source` | Managed volume — governed file storage |
-| Directory | `/transaction_source/` | Where source CSVs land |
-| Schema | `retailq.blob_bronze` | Target schema for the ingested table |
-| Table | `retailq.blob_bronze.transactions` | Target streaming table |
+| Object    | Name                               | Purpose                                         |
+| --------- | ---------------------------------- | ----------------------------------------------- |
+| Schema    | `retailq.volumes`                  | Holds volumes, kept separate from table schemas |
+| Volume    | `retailq.volumes.blob_source`      | Managed volume — governed file storage          |
+| Directory | `/transaction_source/`             | Where source CSVs land                          |
+| Schema    | `retailq.blob_bronze`              | Target schema for the ingested table            |
+| Table     | `retailq.blob_bronze.transactions` | Target streaming table                          |
 
 ### Volumes
 
@@ -39,20 +39,20 @@ which files have already been seen.
 
 ### The two sidecar folders
 
-| Option | Holds | Consequence of deleting it |
-|---|---|---|
-| `checkpointLocation` | Which files have been processed | Next run reloads every file, duplicating rows |
-| `cloudFiles.schemaLocation` | The inferred schema | Schema is re-inferred; evolution history lost |
+| Option                      | Holds                           | Consequence of deleting it                    |
+| --------------------------- | ------------------------------- | --------------------------------------------- |
+| `checkpointLocation`        | Which files have been processed | Next run reloads every file, duplicating rows |
+| `cloudFiles.schemaLocation` | The inferred schema             | Schema is re-inferred; evolution history lost |
 
 Both are created automatically next to the data.
 
 ### Trigger modes
 
-| Trigger | Behaviour |
-|---|---|
-| none (default) | Micro-batches forever; cell never exits, compute never releases |
-| `availableNow=True` | Process everything available now, then stop — **used here** |
-| `processingTime='5 minutes'` | Wake on an interval, run indefinitely |
+| Trigger                      | Behaviour                                                       |
+| ---------------------------- | --------------------------------------------------------------- |
+| none (default)               | Micro-batches forever; cell never exits, compute never releases |
+| `availableNow=True`          | Process everything available now, then stop — **used here**     |
+| `processingTime='5 minutes'` | Wake on an interval, run indefinitely                           |
 
 `availableNow` is correct for this project: the pipeline is triggered by a
 Databricks Job in section 13, not left running.
@@ -95,24 +95,9 @@ and reload the table.
 
 ## Incremental behaviour observed
 
-| Run | Files present | Rows in target |
-|---|---|---|
-| 1 | `transactions_history.csv` (1,000) | 1,000 |
-| 2 | + `transactions_new.csv` (100) | 1,100 |
+| Run | Files present                      | Rows in target |
+| --- | ---------------------------------- | -------------- |
+| 1   | `transactions_history.csv` (1,000) | 1,000          |
+| 2   | + `transactions_new.csv` (100)     | 1,100          |
 
 The first file was not re-read. The checkpoint is what makes this work.
-
-## AWS parallel
-
-Auto Loader's default mode lists the directory to find new files. At scale it
-can switch to file-notification mode, which is conceptually the same design as
-S3 event notifications feeding a queue that a consumer drains. A Unity Catalog
-external volume plays the role of a governed, permissioned mount over an S3
-bucket.
-
-## Note on the AI-generated code
-
-The assistant produced working Auto Loader code from a plain-language prompt,
-but the first version did not exit. Generated pipeline code needs the same
-review as hand-written code — particularly trigger mode, checkpoint location and
-schema options, which are exactly the settings that look fine and behave badly.

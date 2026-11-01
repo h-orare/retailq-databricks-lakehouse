@@ -11,11 +11,11 @@ connector is in Preview.
 
 ## Unity Catalog objects created
 
-| Object | Name | Notes |
-|---|---|---|
+| Object     | Name              | Notes                                     |
+| ---------- | ----------------- | ----------------------------------------- |
 | Connection | `neon_retailq_pg` | A UC securable holding host/user/password |
-| Catalog | `retailq` | Top level of the three-level namespace |
-| Schema | `postgres_bronze` | Target for both ingested tables |
+| Catalog    | `retailq`         | Top level of the three-level namespace    |
+| Schema     | `postgres_bronze` | Target for both ingested tables           |
 
 Full table names: `retailq.postgres_bronze.product_catalog`,
 `retailq.postgres_bronze.inventory`.
@@ -35,10 +35,10 @@ schema `postgres_bronze`.
 **3. Source** — enter the database name (`neondb`), expand schema `public`,
 select both tables, then per table:
 
-| Table | Cursor column | History tracking | Resulting pattern |
-|---|---|---|---|
-| `product_catalog` | `updated_at` | ON | SCD type 2 |
-| `inventory` | `last_stock_update` | OFF | SCD type 1 |
+| Table             | Cursor column       | History tracking | Resulting pattern |
+| ----------------- | ------------------- | ---------------- | ----------------- |
+| `product_catalog` | `updated_at`        | ON               | SCD type 2        |
+| `inventory`       | `last_stock_update` | OFF              | SCD type 1        |
 
 The split is deliberate — it makes the two behaviours directly comparable.
 
@@ -80,10 +80,10 @@ With history tracking ON, two columns are added automatically:
 
 Source changes made, then the pipeline re-run:
 
-| Table | Source change | Records written | Effect |
-|---|---|---|---|
-| `inventory` (SCD 1) | `INV0040` qty 24 → 25 | 1 updated | Row overwritten in place |
-| `product_catalog` (SCD 2) | `P0020` price 9999 → 10000 | 2 upserted | Old row expired, new row inserted |
+| Table                     | Source change              | Records written | Effect                            |
+| ------------------------- | -------------------------- | --------------- | --------------------------------- |
+| `inventory` (SCD 1)       | `INV0040` qty 24 → 25      | 1 updated       | Row overwritten in place          |
+| `product_catalog` (SCD 2) | `P0020` price 9999 → 10000 | 2 upserted      | Old row expired, new row inserted |
 
 ## Querying rules
 
@@ -101,16 +101,10 @@ WHERE DATE('2026-06-01') BETWEEN __START_AT
 Forgetting the `__END_AT IS NULL` filter is the most common SCD type 2 bug: every
 aggregate silently double-counts products that have ever changed.
 
-## Trade-off noted for the summary document
+## Trade-off noted document
 
 History tracking is applied at the **bronze** layer rather than in the silver or
 gold transformation. Bronze is therefore not a pure raw landing copy — it already
 carries dimensional history. This is what the managed connector offers, and it is
 internally consistent, but it differs from the textbook medallion pattern where
 bronze is append-only raw and SCD handling happens downstream.
-
-## Debugging note
-
-During the demo the first `inventory` change did not appear in the target. The
-cause was that the edit was never committed in the Neon console. When a change
-does not propagate, verify the source row first before investigating the pipeline.

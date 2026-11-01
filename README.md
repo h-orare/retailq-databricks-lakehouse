@@ -19,17 +19,17 @@ The business problem: retail data (transactions, CRM, inventory) spread across d
 
 The three sources are chosen deliberately — they are the three ingestion **archetypes** found in almost any real data platform:
 
-| Source | Ingestion pattern | Class of problem |
-|---|---|---|
-| **PostgreSQL** (Neon) | Lakeflow Connect — managed CDC connector | Operational database; rows change, need change capture |
-| **Salesforce** (Dev Edition) | Lakeflow Connect — managed SaaS connector | API-based SaaS; no DB access, soft deletes |
-| **Cloud storage** (CSV) | Auto Loader (`cloudFiles`) | File drops; arrive continuously, must not reprocess |
+| Source                       | Ingestion pattern                         | Class of problem                                       |
+| ---------------------------- | ----------------------------------------- | ------------------------------------------------------ |
+| **PostgreSQL** (Neon)        | Lakeflow Connect — managed CDC connector  | Operational database; rows change, need change capture |
+| **Salesforce** (Dev Edition) | Lakeflow Connect — managed SaaS connector | API-based SaaS; no DB access, soft deletes             |
+| **Cloud storage** (CSV)      | Auto Loader (`cloudFiles`)                | File drops; arrive continuously, must not reprocess    |
 
 ---
 
 ## What this demonstrates
 
-- **Multi-source ingestion** — managed CDC connectors *and* code-based incremental file loading (Auto Loader with checkpointing, schema evolution, rescued data)
+- **Multi-source ingestion** — managed CDC connectors _and_ code-based incremental file loading (Auto Loader with checkpointing, schema evolution, rescued data)
 - **Medallion architecture** — bronze → silver → gold with Lakeflow Declarative Pipelines
 - **Data quality as code** — pipeline expectations (`expect` / `expect_or_drop` / `expect_or_fail`), with rules derived from requirements rather than guessed
 - **Slowly Changing Dimensions** — SCD type 1 vs type 2, implemented and contrasted
@@ -44,16 +44,16 @@ The three sources are chosen deliberately — they are the three ingestion **arc
 
 ## Repository structure
 
-| Folder | Contents |
-|---|---|
-| [`00-docs/`](00-docs/) | Architecture & concept diagrams, the full project summary (`RetailQ-Project-Summary.docx`) |
-| [`01-source-setup/`](01-source-setup/) | PostgreSQL DDL + seed data |
-| [`02-ingestion/`](02-ingestion/) | Lakeflow Connect configuration notes, Auto Loader notebook |
-| [`03-bronze-silver/`](03-bronze-silver/) | Declarative pipeline transformations, data-quality monitoring SQL |
-| [`04-gold/`](04-gold/) | Star-schema fact build, dimension views, calendar |
-| [`05-semantic/`](05-semantic/) | Metric view definition (YAML) + create script |
-| [`06-serving/`](06-serving/) | Dashboard & Genie notes, screenshots |
-| [`07-orchestration/`](07-orchestration/) | Databricks Job definition |
+| Folder                                   | Contents                                                                                   |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------ |
+| [`00-docs/`](00-docs/)                   | Architecture & concept diagrams, the full project summary (`RetailQ-Project-Summary.docx`) |
+| [`01-source-setup/`](01-source-setup/)   | PostgreSQL DDL + seed data                                                                 |
+| [`02-ingestion/`](02-ingestion/)         | Lakeflow Connect configuration notes, Auto Loader notebook                                 |
+| [`03-bronze-silver/`](03-bronze-silver/) | Declarative pipeline transformations, data-quality monitoring SQL                          |
+| [`04-gold/`](04-gold/)                   | Star-schema fact build, dimension views, calendar                                          |
+| [`05-semantic/`](05-semantic/)           | Metric view definition (YAML) + create script                                              |
+| [`06-serving/`](06-serving/)             | Dashboard & Genie notes, screenshots                                                       |
+| [`07-orchestration/`](07-orchestration/) | Databricks Job definition                                                                  |
 
 > `tutor-reference/` subfolders hold the original tutorial code verbatim, kept for comparison against the reviewed/revised implementations alongside them.
 
@@ -91,7 +91,7 @@ Real data engineering is a sequence of judgement calls. The ones made here, stat
 - **Streaming table vs materialized view, chosen per table.** Append-only file sources and facts stream; anything built on a merge-maintained SCD source is a materialized view. Streaming trusts the past; merges rewrite it.
 - **`unit_price` on the dimension, `selling_price` on the fact.** List price describes the product; actual price measures the sale. The gap is the discount, derivable from a join rather than stored twice.
 - **Mixed-grain measure designed out at the semantic layer.** Opportunity `amount` sits at a coarser grain than the transaction fact; it is deliberately excluded from the metric view so no one can `SUM` it incorrectly.
-- **Data-quality rules derived with the business, not generated by AI.** AI was used to *draft* rules and code; every rule's action (warn/drop/fail) was a deliberate choice, and every generated line was reviewed before use.
+- **Data-quality rules derived with the business, not generated by AI.** AI was used to _draft_ rules and code; every rule's action (warn/drop/fail) was a deliberate choice, and every generated line was reviewed before use.
 
 A full decisions-and-trade-offs register is in [`00-docs/RetailQ-Project-Summary.docx`](00-docs/RetailQ-Project-Summary.docx).
 
@@ -110,8 +110,8 @@ Planned extensions are listed in [`00-docs/extension-ideas.md`](00-docs/extensio
 
 > Screenshots from the live workspace.
 
-| Dashboard | Job run (DAG) | Genie (natural language) |
-|---|---|---|
+| Dashboard                                          | Job run (DAG)                                  | Genie (natural language)                   |
+| -------------------------------------------------- | ---------------------------------------------- | ------------------------------------------ |
 | ![Dashboard](06-serving/screenshots/dashboard.png) | ![Job run](06-serving/screenshots/job-run.png) | ![Genie](06-serving/screenshots/genie.png) |
 
 ---
@@ -134,11 +134,3 @@ Each folder's notes contain the exact steps and the concepts behind them.
 ## Certification
 
 This project was built alongside preparation for the **Databricks Certified Data Engineer Associate** exam, and exercises most of its blueprint: Unity Catalog, Delta Lake, Auto Loader, Declarative Pipelines (DLT) with expectations, SCD handling, and Jobs orchestration.
-
----
-
-## Credits & license
-
-Based on the end-to-end Databricks retail project by **Narender Kumar** (YouTube), independently implemented, reviewed, corrected and extended. Original tutorial code is retained in `tutor-reference/` folders for comparison.
-
-Licensed under the [MIT License](LICENSE).

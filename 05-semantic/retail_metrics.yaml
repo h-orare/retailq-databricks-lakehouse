@@ -7,8 +7,7 @@
 #   LANGUAGE YAML
 #   AS $$ <the content below> $$;
 #
-# (In the tutorial, "WITH METRICS LANGUAGE YAML" is what is mis-transcribed
-#  as "matrix language ML". It is YAML, not ML.)
+
 #
 # This is a known-good reference to CHECK the AI-generated view against.
 # The AI cannot know table grain, so every measure expression must be reviewed.
@@ -22,15 +21,15 @@ source: retail_q.retail_gold.fact_sales
 joins:
   - name: product
     source: retail_q.retail_gold.dim_product
-    'on': source.product_id = product.product_id
+    "on": source.product_id = product.product_id
 
   - name: customer
     source: retail_q.retail_gold.dim_customer
-    'on': source.customer_id = customer.customer_id
+    "on": source.customer_id = customer.customer_id
 
   - name: calendar
     source: retail_q.retail_gold.dim_calendar
-    'on': source.transaction_date = calendar.date
+    "on": source.transaction_date = calendar.date
 
 # -------------------------------------------------------------------
 # DIMENSIONS — the "by what". No aggregation; just the slicing angles.
@@ -77,7 +76,6 @@ dimensions:
 # These are the lines to scrutinise in any AI-generated version.
 # -------------------------------------------------------------------
 measures:
-
   # Revenue = quantity * price. NOT SUM(selling_price): a unit price summed
   # across rows is meaningless. Discount subtracted to get net revenue.
   - name: Total revenue
